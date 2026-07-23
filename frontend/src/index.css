@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --border: 214.3 31.8% 91.4%;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #F8FAFC;
+  color: #0f172a;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Indigo glow ring for AI feature cards */
+.ai-glow {
+  box-shadow: 0 0 0 1px rgba(99,102,241,0.25), 0 4px 32px rgba(99,102,241,0.12);
+}
+
+/* File type badge colors */
+.badge-csv  { background: #ecfdf5; color: #059669; }
+.badge-xlsx { background: #eff6ff; color: #2563eb; }
+.badge-xls  { background: #eff6ff; color: #2563eb; }
+.badge-json { background: #fefce8; color: #ca8a04; }
+.badge-parquet { background: #faf5ff; color: #7c3aed; }
+
+/* Drag-over state */
+.dropzone-active {
+  border-color: #6366f1 !important;
+  background: rgba(99,102,241,0.04) !important;
+}

@@ -1,0 +1,27 @@
+# Core Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.25
+python-dotenv==1.0.0
+
+# Data Processing
+pandas==2.2.0
+numpy==1.26.3
+openpyxl==3.1.2
+
+# Machine Learning & Scaling
+scikit-learn==1.4.0
+
+# AI
+openai==1.10.0
+
+# Visualization
+plotly==5.18.0
+
+# Utilities
+pydantic==2.5.3
+pydantic-settings==2.1.0
+httpx==0.26.0
