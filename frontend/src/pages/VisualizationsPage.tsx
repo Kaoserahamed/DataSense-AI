@@ -16,7 +16,6 @@ interface Dataset {
 const VisualizationsPage = () => {
   const { datasetId } = useParams()
   const [chartType, setChartType] = useState<string>('bar')
-  const [chartConfig, setChartConfig] = useState<any>(null)
   const [chartHtml, setChartHtml] = useState<string>('')
 
   // Form state
@@ -57,7 +56,6 @@ const VisualizationsPage = () => {
       return response.data
     },
     onSuccess: (data) => {
-      setChartConfig(data.config)
       setChartHtml(data.html)
     }
   })
