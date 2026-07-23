@@ -118,3 +118,35 @@ Pull requests are always welcome. For significant changes, please open an issue 
 
 ---
 
+## Deployment
+
+### Deploy Frontend to Vercel
+
+1. Push your code to GitHub
+2. Go to [Vercel](https://vercel.com) and import your repository
+3. Set the following configuration:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+4. Add environment variables (if needed):
+   - `VITE_API_URL`: Your backend API URL
+5. Deploy!
+
+### Deploy Backend to Render
+
+1. Push your code to GitHub
+2. Go to [Render](https://render.com) and create a new Web Service
+3. Connect your repository
+4. Render will auto-detect the `render.yaml` configuration
+5. Add environment variables:
+   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `DATABASE_URL`: Your database connection string (optional, uses SQLite by default)
+   - `APP_NAME`: DataSense AI
+   - `DEBUG`: False
+6. Deploy!
+
+**Note**: The `runtime.txt` file specifies Python 3.11.9 to ensure compatibility with all dependencies.
+
+---
+
