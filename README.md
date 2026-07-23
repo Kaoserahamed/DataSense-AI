@@ -33,7 +33,7 @@ DataSense AI is an interactive platform built to make dataset exploration, clean
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/datasense-ai.git
+git clone https://github.com/Kaoserahamed/datasense-ai.git
 cd datasense-ai
 ```
 
