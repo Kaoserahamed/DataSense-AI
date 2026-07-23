@@ -1,3 +1,4 @@
+[![Live Demo](https://img.shields.io/badge/Demo-Live%20App-brightgreen)](https://data-sense-ai.vercel.app)
 # DataSense AI
 
 DataSense AI is an interactive platform built to make dataset exploration, cleaning, and analysis effort-free. It combines automated data processing with conversational AI so you can ask questions, transform data, and build charts using natural language.
