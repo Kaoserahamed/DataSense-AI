@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
+from typing import Optional, List
 
 
 class Settings(BaseSettings):
@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     
     # Storage
     UPLOAD_DIR: str = "./uploads"
+    
+    # CORS — comma-separated list of allowed origins
+    ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
+    
+    def get_allowed_origins(self) -> List[str]:
+        return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
     
     class Config:
         env_file = ".env"

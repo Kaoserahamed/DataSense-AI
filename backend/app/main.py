@@ -40,9 +40,12 @@ app = FastAPI(
 )
 
 # CORS
+allowed_origins = settings.get_allowed_origins()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -53,9 +56,10 @@ app.add_middleware(
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
     origin = request.headers.get("origin", "")
-    allowed = ["http://localhost:5173", "http://localhost:3000"]
+    import re
+    is_allowed = origin in allowed_origins or bool(re.match(r"https://.*\.vercel\.app", origin))
     headers = {}
-    if origin in allowed:
+    if is_allowed:
         headers["Access-Control-Allow-Origin"] = origin
         headers["Access-Control-Allow-Credentials"] = "true"
     return JSONResponse(
