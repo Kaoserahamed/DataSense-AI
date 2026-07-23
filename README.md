@@ -120,33 +120,50 @@ Pull requests are always welcome. For significant changes, please open an issue 
 
 ## Deployment
 
-### Deploy Frontend to Vercel
-
-1. Push your code to GitHub
-2. Go to [Vercel](https://vercel.com) and import your repository
-3. Set the following configuration:
-   - **Framework Preset**: Vite
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-4. Add environment variables (if needed):
-   - `VITE_API_URL`: Your backend API URL
-5. Deploy!
-
 ### Deploy Backend to Render
 
 1. Push your code to GitHub
 2. Go to [Render](https://render.com) and create a new Web Service
 3. Connect your repository
 4. Render will auto-detect the `render.yaml` configuration
-5. Add environment variables:
-   - `OPENAI_API_KEY`: Your OpenAI API key
+5. Add environment variables in Render Dashboard:
+   - `OPENAI_API_KEY`: Your OpenAI or Google Gemini API key
+     - OpenAI keys start with `sk-`
+     - Google Gemini keys start with `AIza` (get from https://ai.google.dev/)
    - `DATABASE_URL`: Your database connection string (optional, uses SQLite by default)
-   - `APP_NAME`: DataSense AI
-   - `DEBUG`: False
+   - Other variables are set in `render.yaml`
 6. Deploy!
+7. Note your backend URL (e.g., `https://your-app.onrender.com`)
 
 **Note**: The `runtime.txt` file specifies Python 3.11.9 to ensure compatibility with all dependencies.
+
+### Deploy Frontend to Vercel
+
+1. Push your code to GitHub (if not already done)
+2. Go to [Vercel](https://vercel.com) and import your repository
+3. Set the following configuration:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+4. Add environment variable:
+   - `VITE_API_URL`: Your Render backend URL (e.g., `https://datasense-ai-mnho.onrender.com`)
+5. Deploy!
+
+### Local Development with Production Backend
+
+Create a `.env` file in the `frontend` directory:
+
+```bash
+VITE_API_URL=https://your-backend.onrender.com
+```
+
+Then run the frontend locally:
+
+```bash
+cd frontend
+npm run dev
+```
 
 ---
 
