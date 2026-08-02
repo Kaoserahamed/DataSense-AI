@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Send, Trash2, Code, TrendingUp, BarChart3 } from 'lucide-react'
+import { Send, Trash2, Code, TrendingUp, BarChart3, X } from 'lucide-react'
 import api from '../services/api'
 import { VisualizationSidebar } from '@/components/VisualizationSidebar'
 interface Dataset {
@@ -86,12 +86,26 @@ const DataChatPage = () => {
 
   const chatMutation = useMutation({
     mutationFn: async (question: string) => {
-      const response = await api.post('/chat/ask', {
-        dataset_id: parseInt(datasetId!),
-        question,
-        save_history: true
-      })
-      return response.data
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
+      
+      try {
+        const response = await api.post('/chat/ask', {
+          dataset_id: parseInt(datasetId!),
+          question,
+          save_history: true
+        }, {
+          signal: controller.signal
+        })
+        clearTimeout(timeoutId)
+        return response.data
+      } catch (error: any) {
+        clearTimeout(timeoutId)
+        if (error.name === 'AbortError' || error.code === 'ECONNABORTED') {
+          throw new Error('Request timeout - the question took too long to process')
+        }
+        throw error
+      }
     },
     onSuccess: (data) => {
       console.log('Chat response:', data) // Debug log
@@ -155,12 +169,38 @@ const DataChatPage = () => {
     if (!question.trim() || chatMutation.isPending) return
     chatMutation.mutate(question)
   }
+  
+  const handleStopGeneration = () => {
+    // Reset mutation state
+    chatMutation.reset()
+    setQuestion('')
+  }
 
   const handleClearHistory = async () => {
-    if (window.confirm('Clear all chat history?')) {
+    if (!window.confirm('Clear all chat history? This cannot be undone.')) return
+    
+    try {
+      // Delete all history items from backend
+      const historyItems = await queryClient.getQueryData(['chat-history', datasetId]) as any[]
+      if (historyItems && historyItems.length > 0) {
+        await Promise.all(
+          historyItems.map((item: any) => 
+            api.delete(`/chat/history/${item.id}`)
+          )
+        )
+      }
+      
+      // Clear local state immediately
       setMessages([])
       setActiveVisualization(null)
+      
+      // Refetch to confirm
       queryClient.invalidateQueries({ queryKey: ['chat-history', datasetId] })
+    } catch (error) {
+      console.error('Error clearing history:', error)
+      // Still clear local state even if backend fails
+      setMessages([])
+      setActiveVisualization(null)
     }
   }
 
@@ -398,14 +438,25 @@ const DataChatPage = () => {
               className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={chatMutation.isPending}
             />
-            <button
-              type="submit"
-              disabled={!question.trim() || chatMutation.isPending}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              <Send size={18} />
-              Send
-            </button>
+            {chatMutation.isPending ? (
+              <button
+                type="button"
+                onClick={handleStopGeneration}
+                className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+              >
+                <X size={18} />
+                Stop
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={!question.trim()}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <Send size={18} />
+                Send
+              </button>
+            )}
           </div>
         </form>
       </div>

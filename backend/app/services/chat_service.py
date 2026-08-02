@@ -39,6 +39,11 @@ class ChatService:
         # Get dataset context
         context = ChatService._get_dataset_context(df)
         
+        # Check if this is a data transformation request
+        transform_result = ChatService._detect_transformation_request(df, question, context, dataset_id)
+        if transform_result:
+            return transform_result
+        
         # Check if this is a visualization request
         viz_result = ChatService._detect_and_generate_visualization(df, question, context, dataset_id)
         if viz_result:
@@ -281,6 +286,73 @@ JSON response:"""
         return None
     
     @staticmethod
+    def _detect_transformation_request(df: pd.DataFrame, question: str, context: str, dataset_id: int = None) -> Optional[Dict[str, Any]]:
+        """
+        Detect if the question requests a data transformation
+        
+        Returns transformation guidance or None if not a transformation request
+        """
+        # Keywords that indicate transformation request
+        transform_keywords = [
+            'encode', 'encoding', 'one-hot', 'onehot', 'dummy', 'dummies',
+            'convert categorical', 'transform categorical', 'label encode',
+            'normalize', 'standardize', 'scale', 'fill missing', 'impute',
+            'remove duplicates', 'drop duplicates', 'remove outliers'
+        ]
+        
+        question_lower = question.lower()
+        is_transform_request = any(keyword in question_lower for keyword in transform_keywords)
+        
+        if not is_transform_request:
+            return None
+        
+        # Detect specific transformation type
+        if any(kw in question_lower for kw in ['encode', 'one-hot', 'onehot', 'dummy', 'convert categorical']):
+            # Get categorical columns
+            categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+            
+            if not categorical_cols:
+                return {
+                    "answer": "There are no categorical columns in this dataset to encode."
+                }
+            
+            # Show preview of encoding
+            encoded_preview = pd.get_dummies(df, columns=categorical_cols[:2] if len(categorical_cols) > 2 else categorical_cols)
+            
+            answer = f"""Yes, categorical columns can be converted to numerical using one-hot encoding.
+
+**Categorical columns found:** {', '.join(categorical_cols)}
+
+**Impact:**
+- Current columns: {len(df.columns)}
+- After encoding: {len(encoded_preview.columns)} columns
+- New binary columns will be created for each category
+
+**⚠️ Important:** Transformations in chat are temporary and won't be saved!
+
+**To permanently apply this transformation:**
+1. Go to the **Data Cleaning** page
+2. Select **"Encode Categorical"** option
+3. Choose columns: {', '.join(categorical_cols)}
+4. Select method: **One-Hot Encoding**
+5. Click **"Save as New Dataset"** to preserve the original data
+
+**Preview of new columns (first 10):**
+{', '.join(list(encoded_preview.columns)[:10])}{'...' if len(encoded_preview.columns) > 10 else ''}"""
+            
+            return {
+                "answer": answer,
+                "code": f"# Preview of one-hot encoding\nresult = pd.get_dummies(df, columns={categorical_cols})",
+                "result": encoded_preview.head(5).to_dict(orient='records'),
+                "result_type": "dataframe"
+            }
+        
+        # Generic transformation response
+        return {
+            "answer": "⚠️ **Data transformations in chat are temporary!**\n\nTo permanently save transformations, use the **Data Cleaning** page where you can:\n- Remove duplicates\n- Fill missing values\n- Encode categorical variables\n- Normalize/standardize numeric columns\n- Remove outliers\n- And more...\n\nAll changes can be saved as a new dataset to preserve your original data."
+        }
+    
+    @staticmethod
     def _get_dataset_context(df: pd.DataFrame) -> str:
         """Get dataset context for prompt"""
         numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
@@ -429,20 +501,27 @@ Generate the code now:"""
             data = result.get("data")
             result_type = result.get("type")
             
-            prompt = f"""Generate a clear, concise answer to the user's question based on the analysis result.
+            # Format data preview for better AI understanding
+            data_preview = data
+            if result_type == "dataframe" and isinstance(data, list) and len(data) > 10:
+                data_preview = data[:10]  # Only show first 10 rows to AI
+            
+            prompt = f"""Generate a clear, helpful answer to the user's question based on the analysis result.
 
 Question: {question}
 
 Result Type: {result_type}
-Result Data: {json.dumps(data, default=str)}
+Result Data: {json.dumps(data_preview, default=str, indent=2)}
 
-Dataset has {len(df)} rows and {len(df.columns)} columns.
+Dataset Info: {len(df)} rows, {len(df.columns)} columns
+Column Names: {', '.join(df.columns.tolist())}
 
-Provide a natural language answer that:
-1. Directly answers the question
-2. Includes the key number(s) or finding(s)
-3. Is concise (2-3 sentences max)
-4. Sounds conversational
+Your answer should:
+1. DIRECTLY answer what the user asked
+2. Include specific numbers and findings from the data
+3. Be clear and conversational (2-4 sentences)
+4. If it's summary statistics (min/max/mean/std), explain what they mean in context
+5. Highlight the most important insights
 
 Answer:"""
             
@@ -462,8 +541,19 @@ Answer:"""
         if result_type == "scalar":
             return f"The result is: {data}"
         elif result_type == "series":
-            return f"Found {len(data)} values: {json.dumps(data, default=str)}"
+            # Format series as a readable list
+            if isinstance(data, dict) and len(data) > 0:
+                items = [f"{k}: {v}" for k, v in list(data.items())[:5]]
+                more = f" (and {len(data) - 5} more)" if len(data) > 5 else ""
+                return f"Results:\n" + "\n".join(items) + more
+            return f"Found {len(data)} values"
         elif result_type == "dataframe":
+            if isinstance(data, list) and len(data) > 0:
+                # Check if this looks like summary statistics
+                first_row = data[0]
+                if any(key in str(first_row) for key in ['min', 'max', 'mean', 'std', 'count']):
+                    return f"Here are the summary statistics. See the table below for details."
+                return f"Found {len(data)} rows. See the table below for details."
             return f"Found {len(data)} rows matching your query."
         elif result_type == "list":
             return f"Found {len(data)} items: {', '.join(map(str, data[:5]))}{'...' if len(data) > 5 else ''}"
