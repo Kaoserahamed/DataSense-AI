@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import logging
+
+# Updated: 2026-08-02 - Added visualization support in chat
 from app.core.config import settings
 from app.api import projects, datasets
 from app.database.connection import init_db

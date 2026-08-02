@@ -27,6 +27,7 @@ class ChatResponse(BaseModel):
     result: Optional[Any] = None
     result_type: Optional[str] = None
     chart_config: Optional[Dict[str, Any]] = None
+    visualization: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
 
 
@@ -62,7 +63,8 @@ def ask_question(request: ChatRequest, db: Session = Depends(get_db)):
         result = ChatService.chat_with_data(
             df=df,
             question=request.question,
-            dataset_name=dataset.name
+            dataset_name=dataset.name,
+            dataset_id=request.dataset_id
         )
         
         # Save to history if requested
