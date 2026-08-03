@@ -28,6 +28,7 @@ class ChatResponse(BaseModel):
     result_type: Optional[str] = None
     chart_config: Optional[Dict[str, Any]] = None
     visualization: Optional[Dict[str, Any]] = None
+    transformation_action: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
 
 
@@ -98,12 +99,12 @@ def ask_question(request: ChatRequest, db: Session = Depends(get_db)):
 @router.get("/history/{dataset_id}", response_model=List[ChatHistoryResponse])
 def get_chat_history(dataset_id: int, limit: int = 50, db: Session = Depends(get_db)):
     """
-    Get chat history for a dataset
+    Get chat history for a dataset (ordered oldest to newest)
     """
     try:
         history = db.query(ChatHistory)\
             .filter(ChatHistory.dataset_id == dataset_id)\
-            .order_by(ChatHistory.created_at.desc())\
+            .order_by(ChatHistory.created_at.asc())\
             .limit(limit)\
             .all()
         

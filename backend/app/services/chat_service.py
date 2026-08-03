@@ -328,14 +328,26 @@ JSON response:"""
 - After encoding: {len(encoded_preview.columns)} columns
 - New binary columns will be created for each category
 
-**⚠️ Important:** Transformations in chat are temporary and won't be saved!
+**⚠️ Important:** To save this transformation permanently, use the Data Cleaning API or page.
 
-**To permanently apply this transformation:**
-1. Go to the **Data Cleaning** page
-2. Select **"Encode Categorical"** option
+**API Endpoint to save:**
+```
+POST /cleaning/encode-categorical
+{{
+  "dataset_id": {dataset_id},
+  "columns": {json.dumps(categorical_cols)},
+  "method": "onehot",
+  "save_as_new": true,
+  "new_name": "{dataset_name}_encoded.csv"
+}}
+```
+
+**Or use the Data Cleaning page:**
+1. Go to **Data Cleaning**
+2. Select **"Encode Categorical"**
 3. Choose columns: {', '.join(categorical_cols)}
-4. Select method: **One-Hot Encoding**
-5. Click **"Save as New Dataset"** to preserve the original data
+4. Method: **One-Hot Encoding**
+5. Click **"Save as New Dataset"**
 
 **Preview of new columns (first 10):**
 {', '.join(list(encoded_preview.columns)[:10])}{'...' if len(encoded_preview.columns) > 10 else ''}"""
@@ -344,7 +356,18 @@ JSON response:"""
                 "answer": answer,
                 "code": f"# Preview of one-hot encoding\nresult = pd.get_dummies(df, columns={categorical_cols})",
                 "result": encoded_preview.head(5).to_dict(orient='records'),
-                "result_type": "dataframe"
+                "result_type": "dataframe",
+                "transformation_action": {
+                    "type": "encode",
+                    "endpoint": "/cleaning/encode-categorical",
+                    "payload": {
+                        "dataset_id": dataset_id,
+                        "columns": categorical_cols,
+                        "method": "onehot",
+                        "save_as_new": True,
+                        "new_name": f"{dataset_name}_encoded.csv"
+                    }
+                }
             }
         
         # Generic transformation response

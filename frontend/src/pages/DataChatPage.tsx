@@ -31,6 +31,11 @@ interface ChatMessage {
     endpoint?: string
     payload?: any
   }
+  transformation_action?: {
+    type: string
+    endpoint: string
+    payload: any
+  }
   error?: string
   timestamp: string
 }
@@ -68,7 +73,7 @@ const DataChatPage = () => {
 
   useEffect(() => {
     if (history && history.length > 0) {
-      const formattedHistory = history.reverse().map((item: any) => ({
+      const formattedHistory = history.map((item: any) => ({
         id: item.id,
         question: item.question,
         answer: item.answer,
@@ -164,6 +169,21 @@ const DataChatPage = () => {
     }
   })
 
+  // Mutation for saving transformations
+  const transformMutation = useMutation({
+    mutationFn: async ({ endpoint, payload }: { endpoint: string; payload: any }) => {
+      const response = await api.post(endpoint, payload)
+      return response.data
+    },
+    onSuccess: (data) => {
+      alert(`Transformation saved! New dataset ID: ${data.new_dataset_id}. Refresh the datasets page to see it.`)
+      queryClient.invalidateQueries({ queryKey: ['datasets'] })
+    },
+    onError: (error: any) => {
+      alert(`Error saving transformation: ${error.response?.data?.detail || error.message}`)
+    }
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!question.trim() || chatMutation.isPending) return
@@ -174,6 +194,12 @@ const DataChatPage = () => {
     // Reset mutation state
     chatMutation.reset()
     setQuestion('')
+  }
+
+  const handleSaveTransformation = (action: { endpoint: string; payload: any }) => {
+    if (window.confirm('Save this transformation as a new dataset?')) {
+      transformMutation.mutate(action)
+    }
   }
 
   const handleClearHistory = async () => {
@@ -333,6 +359,17 @@ const DataChatPage = () => {
                     >
                       <BarChart3 size={16} />
                       View {msg.visualization.type.toUpperCase()} Chart
+                    </button>
+                  )}
+
+                  {/* Transformation Save Button */}
+                  {msg.transformation_action && (
+                    <button
+                      onClick={() => handleSaveTransformation(msg.transformation_action!)}
+                      disabled={transformMutation.isPending}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 text-sm font-medium"
+                    >
+                      {transformMutation.isPending ? 'Saving...' : 'Save as New Dataset'}
                     </button>
                   )}
 
