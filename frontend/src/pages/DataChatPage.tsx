@@ -233,11 +233,6 @@ const DataChatPage = () => {
     }
   }
 
-  const allColumns = [
-    ...(dataset?.metadata?.numeric_columns || []),
-    ...(dataset?.metadata?.categorical_columns || [])
-  ]
-
   return (
     <div className="h-[calc(100vh-120px)] flex gap-0">
       {/* Main Chat Area */}

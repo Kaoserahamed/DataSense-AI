@@ -78,16 +78,16 @@ export const VisualizationSidebar: React.FC<VisualizationSidebarProps> = ({
           </div>
         )}
 
-        {visualization.html && !isLoading && (
+        {visualization?.html && !isLoading && (
           <iframe
             ref={iframeRef}
             className="w-full"
             style={{ height: '100%', border: 'none' }}
-            title={visualization.title}
+            title={visualization?.title || 'Visualization'}
           />
         )}
 
-        {!visualization.html && !isLoading && (
+        {!visualization?.html && !isLoading && (
           <div className="flex items-center justify-center h-full text-gray-400">
             <div className="text-center p-4">
               <p className="text-sm text-gray-600">No visualization data available</p>
