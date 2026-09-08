@@ -4,8 +4,10 @@
 **2. Dataset Statistics**
 
 <img width="1913" height="868" alt="Screenshot 2026-09-08 093939" src="https://github.com/user-attachments/assets/c04b05bd-c2fd-469f-9140-ff8d59194d74" />
+
 **3. Generate Visualizations**
 <img width="1917" height="865" alt="Screenshot 2026-09-08 094133" src="https://github.com/user-attachments/assets/17d6998e-0f86-489a-8634-c3ca763362d4" />
+
 **4. Agent Chat**
 <img width="1911" height="862" alt="Screenshot 2026-09-08 094327" src="https://github.com/user-attachments/assets/75abee44-7d2e-45a2-ad4f-02c1293734c6" />
 
