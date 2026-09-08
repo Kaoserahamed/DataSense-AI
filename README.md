@@ -8,7 +8,11 @@
 <img width="1917" height="865" alt="Screenshot 2026-09-08 094133" src="https://github.com/user-attachments/assets/17d6998e-0f86-489a-8634-c3ca763362d4" />
 **4. Agent Chat**
 <img width="1911" height="862" alt="Screenshot 2026-09-08 094327" src="https://github.com/user-attachments/assets/75abee44-7d2e-45a2-ad4f-02c1293734c6" />
+
+
 [![Live Demo](https://img.shields.io/badge/Demo-Live%20App-brightgreen)](https://data-sense-ai-ksif.vercel.app/dashboard)
+
+
 # DataSense AI
 
 DataSense AI is an interactive platform built to make dataset exploration, cleaning, and analysis effort-free. It combines automated data processing with conversational AI so you can ask questions, transform data, and build charts using natural language.
